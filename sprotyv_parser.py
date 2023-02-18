@@ -14,14 +14,19 @@ sprotyv_tree = etree.HTML(sprotyv_html)
 # .format: 1 - область, 2 - військомат, 3 - стовпець
 xpath = "/html/body/div/section[2]/div/div[{}]/div/div[2]/div/div/table/tbody/tr[{}]/td[{}]/text()" 
 
-def get_milcoms() -> list:
+def get_milcom_raw(obl: int, milcom: int):
+    name = "".join(sprotyv_tree.xpath(xpath.format(obl, milcom, 1))).strip()
+    info = "".join(sprotyv_tree.xpath(xpath.format(obl, milcom, 2))).strip()
+    phones = "".join(sprotyv_tree.xpath(xpath.format(obl, milcom, 3))).strip()
+    return milcom_raw(name, info, phones)
+
+def get_milcoms_raw() -> list:
     # Парсинг даних з сайту
     milcoms_raw = []
     for i_obl in range(1,24+1):
-        for i_milcom in range(1,2+1): #TODO: N of milcoms
-            name = sprotyv_tree.xpath(xpath.format(i_obl, i_milcom, 1))[0]
-            info = sprotyv_tree.xpath(xpath.format(i_obl, i_milcom, 2))[0]
-            phones = sprotyv_tree.xpath(xpath.format(i_obl, i_milcom, 3))[0]
-            milcoms_raw.append(milcom_raw(name, info, phones))
+        tbody = sprotyv_tree.xpath(f"/html/body/div/section[2]/div/div[{i_obl}]/div/div[2]/div/div/table/tbody/text()")
+        tlen = len(tbody) - 1
+        for i_milcom in range(1,tlen): #TODO: N of milcoms
+            milcom = get_milcom_raw(i_obl, i_milcom)
+            milcoms_raw.append(milcom)
     return milcoms_raw
-
