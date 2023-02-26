@@ -1,5 +1,10 @@
 from typing import NamedTuple
 import geocoder
+from dotenv import load_dotenv
+from os import getenv
+
+load_dotenv()
+GMAPSKEY = getenv("GMAPSKEY")
 """
 MilCom - military commissariat (військомат)
 """
@@ -22,7 +27,7 @@ def get(name:str, info:str, phones:str) -> MilCom:
     """
     Повертає клас даних воєнкомата з отриманими координатами від geocodefarm.
     """
-    response = geocoder.geocodefarm(info) # TODO: Error handling
+    response = geocoder.google(info, key=GMAPSKEY) # TODO: Error handling
     if(response):
         latlng = response.latlng
         return MilCom(name, latlng, phones)
