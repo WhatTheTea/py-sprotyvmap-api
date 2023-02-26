@@ -11,8 +11,9 @@ sprotyv_tree = etree.HTML(sprotyv_html)
 # .format: 1 - область, 2 - військомат, 3 - стовпець
 xpath_data = "/html/body/div/section[2]/div/div[{}]/div/div[2]/div/div/table/tbody/tr[{}]/td[{}]/text()" 
 xpath_tbody = "/html/body/div/section[2]/div/div[{}]/div/div[2]/div/div/table/tbody/text()"
+xpath_district = "/html/body/div/section[2]/div/div[{}]/div/div[1]/span/span[1]/text()"
 
-def get_milcom_raw(district: int, milcom: int) -> sprotyv_milcom.MilComRaw:
+def milcom_raw(district: int, milcom: int) -> sprotyv_milcom.MilComRaw:
     """
     Парсить адресу та інфо воєнкомату з сайту за номером області та номером воєнкомата.\n
     Номер воєнкомата є відносним кожної окремої області.
@@ -22,15 +23,15 @@ def get_milcom_raw(district: int, milcom: int) -> sprotyv_milcom.MilComRaw:
     phones = "".join(sprotyv_tree.xpath(xpath_data.format(district, milcom, 3))).strip()
     return sprotyv_milcom.MilComRaw(name, info, phones)
 
-def get_milcoms_raw() -> list:
+def milcoms_raw() -> list:
     """
     Повертає список спарсених адрес воєнкоматів
     """
     milcoms_raw = []
-    for i_obl in range(1,24+1):
-        tbody = sprotyv_tree.xpath(xpath_tbody.format(i_obl))
-        tlen = len(tbody) - 1
-        for i_milcom in range(1,tlen):
-            milcom = get_milcom_raw(i_obl, i_milcom)
+    for district_id in range(1,24+1):
+        tbody = sprotyv_tree.xpath(xpath_tbody.format(district_id))
+        milcoms_count = len(tbody) - 1
+        for milcom_id in range(1,milcoms_count):
+            milcom = milcom_raw(district_id, milcom_id)
             milcoms_raw.append(milcom)
     return milcoms_raw

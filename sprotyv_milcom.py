@@ -20,7 +20,7 @@ class MilCom(NamedTuple):
 
 def get(name:str, info:str, phones:str) -> MilCom:
     """
-    Повертає клас даних воєнкомата з отриманими координатами від OSM.
+    Повертає клас даних воєнкомата з отриманими координатами від geocodefarm.
     """
     response = geocoder.geocodefarm(info) # TODO: Error handling
     if(response):
