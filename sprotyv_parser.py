@@ -1,4 +1,4 @@
-from typing import *
+from typing import Dict,List,Tuple
 from lxml import etree
 from requests import get as http_get
 import sprotyv_milcom

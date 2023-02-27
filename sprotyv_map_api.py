@@ -1,6 +1,7 @@
 import flask
 import sprotyv_parser
-import sprotyv_milcom
+from sprotyv_milcom import MilCom, MilComRaw
+from json import dumps as tojson
 
 app = flask.Flask(__name__)
 
@@ -15,25 +16,30 @@ def get_raw_milcoms():
 @app.route("/get/districts/<int:district_id>/milcoms/<int:milcom_id>")
 def get_milcom(district_id:int, milcom_id:int):
     milcom_raw = sprotyv_parser.milcom_raw(district_id, milcom_id)
-    milcom = sprotyv_milcom.get(*milcom_raw)
+    milcom = MilCom(*milcom_raw)
     if milcom:
-        response = flask.jsonify(milcom._asdict())
+        response = flask.jsonify(milcom)
         return response
     flask.abort(404)
 
 @app.route("/get/districts")
 def get_milcoms():
-    districts = dict()
-    for k,v in sprotyv_parser.districts_raw().items():
-        milcoms = []
-        districts[k] = milcoms
-        for milcom_raw in v:
-            milcom = sprotyv_milcom.get(*milcom_raw)
-            if milcom:
-                milcoms.append(milcom._asdict())
-                
-    if districts:
-        response = flask.jsonify(districts)
-        return response
-    flask.abort(404)
+    """
+    Отримує всі координати воєнкоматів України
+    ! Виконання цього запиту займає багато часу, див. MilCom\n
+    """
+    def get():
+        """
+        { "district":[...], "other":[...] }
+        """
+        yield '{'
+        districts = list(sprotyv_parser.districts_raw().items())
+        for i in range(len(districts)):
+            name, milcoms = districts[i]
+            yield f'"{name}":'
+            yield tojson([MilCom(*milcom).__dict__ for milcom in milcoms])
+            if i < len(districts)-1:
+                yield ","
+        yield '}'
+    return get(), {"Content-Type": "application/json"}
 

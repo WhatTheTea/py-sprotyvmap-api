@@ -1,4 +1,4 @@
-from typing import NamedTuple
+from dataclasses import dataclass, astuple
 import geocoder
 from dotenv import load_dotenv
 from os import getenv
@@ -8,28 +8,38 @@ GMAPSKEY = getenv("GMAPSKEY")
 """
 MilCom - military commissariat (військомат)
 """
-class MilComRaw(NamedTuple):
+@dataclass
+class MilComRaw:
     """
-    Клас який зберігає необроблені дані про воєнкомати.\n
+    Об'єкт який зберігає необроблені дані про воєнкомати.\n
     """
     name:str
     info:str
     phones:str
-class MilCom(NamedTuple):    
+
+    def __iter__(self):
+        return iter(astuple(self))
+@dataclass
+class MilCom:    
     """
-    Клас який зберігає дані про воєнкомат та його координати.\n
+    Об'єкт який зберігає дані про воєнкомат та його координати.\n
+    ! При створенні цього об'єкту відбувається звернення до Google Maps API\n
+    ! Це може вплинути на швидкодію
     """
     name:str
     latlng:tuple
     info:str
 
+    def __init__(self, name:str, info:str, phones:str):
+        response = geocoder.google(info, key=GMAPSKEY) # TODO: Error handling
+        if(response):
+            self.info = phones
+            self.latlng = response.latlng
+            self.name = name
+        print(f"Адресу {info} не було знайдено")
+    
+    def __iter__(self):
+        return iter(astuple(self))
+
 def get(name:str, info:str, phones:str) -> MilCom:
-    """
-    Повертає клас даних воєнкомата з отриманими координатами від geocodefarm.
-    """
-    response = geocoder.google(info, key=GMAPSKEY) # TODO: Error handling
-    if(response):
-        latlng = response.latlng
-        return MilCom(name, latlng, phones)
-    print(f"Адресу {info} не було знайдено")
-    return None
+    return MilCom(name, info, phones)
