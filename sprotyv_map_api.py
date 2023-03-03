@@ -5,8 +5,11 @@ from json import dumps as tojson
 
 app = flask.Flask(__name__)
 
-@app.route("/get/districts/raw", methods=["GET"])
+@app.route("/get/districts/raw")
 def get_raw_milcoms():
+    """
+    Отримує всі адреси воєнкоматів України + контактні дані
+    """
     milcoms_raw = sprotyv_parser.districts_raw()
     if milcoms_raw:
         response = flask.jsonify(milcoms_raw)
@@ -15,6 +18,10 @@ def get_raw_milcoms():
 
 @app.route("/get/districts/<int:district_id>/milcoms/<int:milcom_id>")
 def get_milcom(district_id:int, milcom_id:int):
+    """
+    Отримує координати воєнкомату за його номером та номером області\n
+    ? Номери починаються з 1
+    """
     milcom_raw = sprotyv_parser.milcom_raw(district_id, milcom_id)
     milcom = MilCom(*milcom_raw)
     if milcom:
@@ -23,9 +30,9 @@ def get_milcom(district_id:int, milcom_id:int):
     flask.abort(404)
 
 @app.route("/get/districts")
-def get_milcoms():
+def get_districts():
     """
-    Отримує всі координати воєнкоматів України
+    Отримує всі координати воєнкоматів України + контактні дані
     ! Виконання цього запиту займає багато часу, див. MilCom\n
     """
     def get():
@@ -42,4 +49,8 @@ def get_milcoms():
                 yield ","
         yield '}'
     return get(), {"Content-Type": "application/json"}
+
+@app.route("/get/districts/[<int:district_id>]/milcoms")
+def get_district(district_id:int):
+    pass
 

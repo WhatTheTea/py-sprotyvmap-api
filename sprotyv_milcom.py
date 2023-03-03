@@ -1,10 +1,10 @@
 from dataclasses import dataclass, astuple
-import geocoder
+import visicom_geocoder
 from dotenv import load_dotenv
 from os import getenv
 
 load_dotenv()
-GMAPSKEY = getenv("GMAPSKEY")
+APIKEY = getenv("VISICOM")
 """
 MilCom - military commissariat (військомат)
 """
@@ -31,7 +31,9 @@ class MilCom:
     info:str
 
     def __init__(self, name:str, info:str, phones:str):
-        response = geocoder.google(info, key=GMAPSKEY) # TODO: Error handling
+        geocoder = visicom_geocoder.Geocoder(APIKEY)
+        response = 1
+        # TODO: Error handling
         if(response):
             self.info = phones
             self.latlng = response.latlng
@@ -40,6 +42,3 @@ class MilCom:
     
     def __iter__(self):
         return iter(astuple(self))
-
-def get(name:str, info:str, phones:str) -> MilCom:
-    return MilCom(name, info, phones)

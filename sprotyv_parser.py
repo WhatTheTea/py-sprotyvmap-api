@@ -1,7 +1,7 @@
 from typing import Dict,List,Tuple
 from lxml import etree
 from requests import get as http_get
-import sprotyv_milcom
+from sprotyv_milcom import MilComRaw
 
 # Завантаження дерева сайту
 sprotyv_html = http_get("https://sprotyv.in.ua/").text
@@ -14,7 +14,7 @@ xpath_data = "/html/body/div/section[2]/div/div[{}]/div/div[2]/div/div/table/tbo
 xpath_table = "/html/body/div/section[2]/div/div[{}]/div/div[2]/div/div/table/tbody/text()"
 xpath_district = "/html/body/div/section[2]/div/div[{}]/div/div[1]/span/span[1]/text()"
 
-def milcom_raw(district: int, milcom: int) -> sprotyv_milcom.MilComRaw:
+def milcom_raw(district: int, milcom: int) -> MilComRaw:
     """
     Парсить адресу та інфо воєнкомату з сайту за номером області та номером воєнкомата.\n
     Номер воєнкомата є відносним кожної окремої області.
@@ -22,7 +22,7 @@ def milcom_raw(district: int, milcom: int) -> sprotyv_milcom.MilComRaw:
     name = "".join(sprotyv_tree.xpath(xpath_data.format(district, milcom, 1))).strip()
     info = "".join(sprotyv_tree.xpath(xpath_data.format(district, milcom, 2))).strip()
     phones = "".join(sprotyv_tree.xpath(xpath_data.format(district, milcom, 3))).strip()
-    return sprotyv_milcom.MilComRaw(name, info, phones)
+    return MilComRaw(name, info, phones)
 
 def district_raw(district_id:int) -> Tuple[str, list]:
     """
@@ -35,7 +35,7 @@ def district_raw(district_id:int) -> Tuple[str, list]:
     
     return (district_name, milcoms_raw)
 
-def districts_raw() -> Dict[str, List[sprotyv_milcom.MilComRaw]]:
+def districts_raw() -> Dict[str, List[MilComRaw]]:
     """
     Повертає список спарсених адрес воєнкоматів розділених по областях
     """
