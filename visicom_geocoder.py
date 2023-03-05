@@ -81,7 +81,7 @@ Args:
             Формат даних, що повертаються (json, csv).
                 default: json
 Returns: 
-    str: Координати шуканої локації (latitude, longitude)
+    Tuple[int,int]: Координати шуканої локації (latitude, longitude)
         """
         preset_kwargs = {
             "format" : "json",

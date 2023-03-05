@@ -26,7 +26,7 @@ def milcom_raw(district: int, milcom: int) -> MilComRaw:
 
 def district_raw(district_id:int) -> Tuple[str, list]:
     """
-    Поветрає ім'я області та воєнкомати в ній
+    Повертає ім'я області та воєнкомати в ній
     """
     table = sprotyv_tree.xpath(xpath_table.format(district_id))
     district_name = "".join(sprotyv_tree.xpath(xpath_district.format(district_id))).strip()
@@ -37,7 +37,7 @@ def district_raw(district_id:int) -> Tuple[str, list]:
 
 def districts_raw() -> Dict[str, List[MilComRaw]]:
     """
-    Повертає список спарсених адрес воєнкоматів розділених по областях
+    Повертає список спарсених адрес воєнкоматів розділених по областям
     """
     districts_raw = dict()
     for district_id in range(1,24+1):
