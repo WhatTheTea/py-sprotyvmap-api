@@ -1,13 +1,15 @@
 from dataclasses import dataclass, astuple
-import geocoder
+from cachetools import cached, LRUCache
+import visicom_geocoder
 from dotenv import load_dotenv
 from os import getenv
+import re
 
 load_dotenv()
-GMAPSKEY = getenv("GMAPSKEY")
-"""
-MilCom - military commissariat (військомат)
-"""
+APIKEY = getenv("VISICOM")
+
+_cache = LRUCache(500)
+
 @dataclass
 class MilComRaw:
     """
@@ -23,23 +25,39 @@ class MilComRaw:
 class MilCom:    
     """
     Об'єкт який зберігає дані про воєнкомат та його координати.\n
-    ! При створенні цього об'єкту відбувається звернення до Google Maps API\n
-    ! Це може вплинути на швидкодію
+    ! Створення цього об'єкту є дорогим, але результат дорогої функції кешується
     """
     name:str
     latlng:tuple
     info:str
 
     def __init__(self, name:str, info:str, phones:str):
-        response = geocoder.google(info, key=GMAPSKEY) # TODO: Error handling
-        if(response):
+        latlng = _latlng_(info)
+        if latlng:
             self.info = phones
-            self.latlng = response.latlng
+            self.latlng = latlng
             self.name = name
-        print(f"Адресу {info} не було знайдено")
-    
+
     def __iter__(self):
         return iter(astuple(self))
-
-def get(name:str, info:str, phones:str) -> MilCom:
-    return MilCom(name, info, phones)
+    
+@cached(_cache)
+def _latlng_(location:str):
+    """
+    Кешована функція отримання координат за назвою локації.\n
+    Додатково шукає назву міста, вулиці, будинку у разі некоректного location
+    Args:
+        location (str): Локація для знаходження
+    Returns:
+        Tuple[int,int]: Координати локації
+    """
+    geocoder = visicom_geocoder.Geocoder(APIKEY)
+    latlng = geocoder.geocode(location)
+    if not latlng:
+        # Якась область, м.\смт.\с. Якесь, вул. Якась, якийсь
+        re_pattern = r"(\b\w+ область\b).*\b(м|смт?|с)\.\s*(\w+).*вул\.\s*(.*?)\s*,\s*(\d+)"
+        re_result = re.search(re_pattern, location)
+        if re_result:
+            # Повторний запит
+            latlng = geocoder.geocode(re_result.string)
+    return latlng
