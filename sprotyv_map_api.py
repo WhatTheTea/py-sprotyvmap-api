@@ -49,16 +49,17 @@ def generate_districts():
             name, milcoms_raw = districts[i]
 
             yield f'"{name}":'
-            # Обробляє спарсені воєнкомати та фільтрує від пустих словників
             milcoms = milcoms_generator()
             yield json.dumps(milcoms)
-            
             if i < len(districts)-1:
                 yield ","
         yield '}'
 
 @app.route("/get/districts/<int:district_id>")
 def get_district(district_id:int):
+    """
+    Отримує всі координати воєнкоматів в області під номером district_id
+    """
     name, milcoms_raw = sprotyv_parser.district_raw(district_id)
     result = "{"
     result += f'"{name}":'
@@ -67,6 +68,9 @@ def get_district(district_id:int):
     return result, {"Content-Type": "application/json"}
 
 def milcoms_generator(milcoms_raw:List[MilComRaw]) -> List[dict]:
+    """
+    Обробляє спарсені воєнкомати та фільтрує від пустих словників
+    """
     return [milcom for milcom_raw in milcoms_raw if not is_empty(milcom := MilCom(*milcom_raw).__dict__)]
 
 def is_empty(x):
