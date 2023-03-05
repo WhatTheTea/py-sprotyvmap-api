@@ -9,9 +9,7 @@ load_dotenv()
 APIKEY = getenv("VISICOM")
 
 _cache = LRUCache(500)
-"""
-MilCom - military commissariat (військомат)
-"""
+
 @dataclass
 class MilComRaw:
     """
@@ -56,8 +54,10 @@ def _latlng_(location:str):
     geocoder = visicom_geocoder.Geocoder(APIKEY)
     latlng = geocoder.geocode(location)
     if not latlng:
+        # Якась область, м.\смт.\с. Якесь, вул. Якась, якийсь
         re_pattern = r"(\b\w+ область\b).*\b(м|смт?|с)\.\s*(\w+).*вул\.\s*(.*?)\s*,\s*(\d+)"
         re_result = re.search(re_pattern, location)
         if re_result:
+            # Повторний запит
             latlng = geocoder.geocode(re_result.string)
     return latlng

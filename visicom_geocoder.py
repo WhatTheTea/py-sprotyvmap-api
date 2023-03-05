@@ -57,12 +57,10 @@ import requests
 """
 class Geocoder:
     """
-    Неповна реалізація geocoding API від Visicom. (to be continued?)
-
-    TODO: аргументи запиту через builder
+    Неповна реалізація geocoding API від Visicom.
     """
     _apikey: str
-    _allowedArgs = {'lang', 'key', 'format', 'text','limit'}
+    _allowedArgs = {'lang', 'key', 'format', 'text', 'limit'}
 
     def __init__(self, apikey:str) -> None:
         self._apikey = apikey
@@ -98,7 +96,7 @@ Returns:
             if k in self._allowedArgs:
                 v = str(v).replace('&','').replace('?','')
                 request_str += f'&{k}={v}'
-
+        # Запит
         try:
             request = requests.get(request_str)
 
