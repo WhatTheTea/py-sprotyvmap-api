@@ -1,7 +1,8 @@
 import flask
 import sprotyv_parser
+import json
+from typing import List
 from sprotyv_milcom import MilCom, MilComRaw
-from json import dumps as tojson
 
 app = flask.Flask(__name__)
 
@@ -12,7 +13,7 @@ def get_raw_milcoms():
     """
     milcoms_raw = sprotyv_parser.districts_raw()
     if milcoms_raw:
-        response = flask.jsonify(milcoms_raw.__dict__)
+        response = flask.jsonify(milcoms_raw)
         return response
     flask.abort(404)
 
@@ -20,7 +21,6 @@ def get_raw_milcoms():
 def get_milcom(district_id:int, milcom_id:int):
     """
     Отримує координати воєнкомату за його номером та номером області\n
-    ? Номери починаються з 1
     """
     milcom_raw = sprotyv_parser.milcom_raw(district_id, milcom_id)
     milcom = MilCom(*milcom_raw).__dict__
@@ -32,8 +32,7 @@ def get_milcom(district_id:int, milcom_id:int):
 @app.route("/get/districts")
 def get_districts():
     """
-    Отримує всі координати воєнкоматів України + контактні дані
-    ! Виконання цього запиту займає багато часу, див. MilCom\n
+    Отримує всі координати воєнкоматів України + контактні дані де можливо
     """
     return generate_districts(), {"Content-Type": "application/json"}
 
@@ -51,17 +50,24 @@ def generate_districts():
 
             yield f'"{name}":'
             # Обробляє спарсені воєнкомати та фільтрує від пустих словників
-            milcoms = [milcom for milcom_raw in milcoms_raw if not is_empty(milcom := MilCom(*milcom_raw).__dict__)]
-            yield tojson(milcoms)
+            milcoms = milcoms_generator()
+            yield json.dumps(milcoms)
             
             if i < len(districts)-1:
                 yield ","
         yield '}'
 
+@app.route("/get/districts/<int:district_id>")
+def get_district(district_id:int):
+    name, milcoms_raw = sprotyv_parser.district_raw(district_id)
+    result = "{"
+    result += f'"{name}":'
+    result += json.dumps(milcoms_generator(milcoms_raw))
+    result += '}'
+    return result, {"Content-Type": "application/json"}
+
+def milcoms_generator(milcoms_raw:List[MilComRaw]) -> List[dict]:
+    return [milcom for milcom_raw in milcoms_raw if not is_empty(milcom := MilCom(*milcom_raw).__dict__)]
+
 def is_empty(x):
     return x is None or x == {} or x == []
-
-@app.route("/get/districts/[<int:district_id>]/milcoms")
-def get_district(district_id:int):
-    pass
-
