@@ -33,8 +33,7 @@ class MilCom:
     info:str
 
     def __init__(self, name:str, info:str, phones:str):
-        geocoder = visicom_geocoder.Geocoder(APIKEY)
-        latlng = geocode_regex_wrapper(geocoder, info)
+        latlng = geocode_regex_wrapper(info)
         if latlng:
             self.info = phones
             self.latlng = latlng
@@ -44,7 +43,7 @@ class MilCom:
         return iter(astuple(self))
     
 @cached(_cache)
-def geocode_regex_wrapper(geocoder:visicom_geocoder.Geocoder, location:str, **kwargs):
+def geocode_regex_wrapper(location:str, **kwargs):
     """
     Кешована функція отримання координат за назвою локації.\n
     Args:
@@ -54,6 +53,7 @@ def geocode_regex_wrapper(geocoder:visicom_geocoder.Geocoder, location:str, **kw
     Returns:
         Tuple[int,int]: Координати локації
     """
+    geocoder = visicom_geocoder.Geocoder(APIKEY)
     # Якась область, м.\смт.\с. Якесь, вул. Якась, якийсь
     re_distric_pattern = r"[А-Яа-яіІ-]+ (обл\.|область)"
     re_town_pattern = r"((м\.|смт\.|с\.|смт|пгт\.)\s*[А-Яа-яіІ-]+)((.*\d[а-я]{1})|(.*\d))"
