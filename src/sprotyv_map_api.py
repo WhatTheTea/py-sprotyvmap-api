@@ -49,7 +49,7 @@ def generate_districts():
             name, milcoms_raw = districts[i]
 
             yield f'"{name}":'
-            milcoms = milcoms_generator()
+            milcoms = milcoms_generator(milcoms_raw)
             yield json.dumps(milcoms)
             if i < len(districts)-1:
                 yield ","
