@@ -1,5 +1,12 @@
 from typing import Tuple
+from enum import Enum
 import requests
+
+class GeocoderExceptions(Enum):
+    BAD_API_KEY = -1
+    REQUEST_NOT_OK = -2
+    NOT_FOUND = -3
+
 """
 Із вебсайту Visicom Geocoding API:
     https://api.visicom.ua/data-api/5.0/[lang]/geocode[.format]?
@@ -97,25 +104,18 @@ Returns:
                 v = str(v).replace('&','').replace('?','')
                 request_str += f'&{k}={v}'
         # Запит
-        try:
-            request = requests.get(request_str)
+        request = requests.get(request_str)
 
-            if request.text == "{'status': 'Unauthorized'}" or request.status_code == 401:
-                raise Exception(f"Не вдалося отримати доступ до сервісу геокодування. Перевірте ключ API")
-            
-            if not request.ok:
-                raise Exception(f"Запит до сервісу геокодування не був успішим. Помилка {request.status_code} {request.reason}")
-            
-            if request.text == "{}":
-                raise Exception(f"Не вдалося знайти координати за адресою: {location}")
-            
-        except Exception as ex:
-            print(ex)
-            return None
+        if request.text == "{'status': 'Unauthorized'}" or request.status_code == 401:
+            raise Exception(f"Не вдалося отримати доступ до сервісу геокодування. Перевірте ключ API", GeocoderExceptions.BAD_API_KEY)
         
-        else:
-            request_json = request.json()
-            point = request_json["geo_centroid"]['coordinates']
-            coords = point[1], point[0]
-            return coords
+        if not request.ok:
+            raise Exception(f"Запит до сервісу геокодування не був успішим. Помилка {request.status_code} {request.reason}", GeocoderExceptions.REQUEST_NOT_OK)
         
+        if request.text == "{}":
+            raise Exception(f"Не вдалося знайти координати за адресою: {location}", GeocoderExceptions.NOT_FOUND)
+        
+        request_json = request.json()
+        point = request_json["geo_centroid"]['coordinates']
+        coords = point[1], point[0]
+        return coords

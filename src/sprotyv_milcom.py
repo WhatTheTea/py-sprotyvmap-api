@@ -51,13 +51,25 @@ def _latlng_(location:str):
     Returns:
         Tuple[int,int]: Координати локації
     """
-    geocoder = visicom_geocoder.Geocoder(APIKEY)
-    latlng = geocoder.geocode(location)
-    if not latlng:
-        # Якась область, м.\смт.\с. Якесь, вул. Якась, якийсь
-        re_pattern = r"(\b\w+ область\b).*\b(м|смт?|с)\.\s*(\w+).*вул\.\s*(.*?)\s*,\s*(\d+)"
-        re_result = re.search(re_pattern, location)
-        if re_result:
-            # Повторний запит
-            latlng = geocoder.geocode(re_result.string)
+    try:
+        geocoder = visicom_geocoder.Geocoder(APIKEY)
+        latlng = geocoder.geocode(location)
+    except Exception as ex:
+        if visicom_geocoder.GeocoderExceptions.NOT_FOUND in ex:
+           latlng = geocode_regex_wrapper(location)
+        else:
+            print(ex)
+            return None
+    finally:
+        return latlng
+
+def geocode_regex_wrapper(geocoder:visicom_geocoder.Geocoder, location:str, **kwargs):
+    # Якась область, м.\смт.\с. Якесь, вул. Якась, якийсь
+    re_pattern = r"(\b\w+ область\b).*\b(м|смт?|с)\.\s*(\w+).*вул\.\s*(.*?)\s*,\s*(\d+)"
+    re_result = re.search(re_pattern, location)
+    if re_result:
+        try:
+            latlng = geocoder.geocode(re_result.string, **kwargs)
+        except Exception as ex:
+            print(ex)
     return latlng
