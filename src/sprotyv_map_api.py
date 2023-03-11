@@ -34,7 +34,10 @@ def get_districts():
     """
     Отримує всі координати воєнкоматів України + контактні дані де можливо
     """
-    return generate_districts(), {"Content-Type": "application/json"}
+    return generate_districts(), {
+        "Content-Type": "application/json", 
+        "Access-Control-Allow-Origin":'*' # ! Потенційно небезпечно
+        }
 
 def generate_districts():
         """
@@ -49,7 +52,7 @@ def generate_districts():
             name, milcoms_raw = districts[i]
 
             yield f'"{name}":'
-            milcoms = milcoms_generator()
+            milcoms = milcoms_generator(milcoms_raw)
             yield json.dumps(milcoms)
             if i < len(districts)-1:
                 yield ","

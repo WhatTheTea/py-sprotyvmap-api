@@ -10,7 +10,7 @@
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP": "sprotyv_map_api.py",
+                "FLASK_APP": "src/sprotyv_map_api.py",
                 "FLASK_DEBUG": "1"
             },
             "args": [

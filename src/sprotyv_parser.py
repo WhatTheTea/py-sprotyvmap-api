@@ -14,6 +14,9 @@ xpath_data = "/html/body/div/section[2]/div/div[{}]/div/div[2]/div/div/table/tbo
 xpath_table = "/html/body/div/section[2]/div/div[{}]/div/div[2]/div/div/table/tbody/text()"
 xpath_district = "/html/body/div/section[2]/div/div[{}]/div/div[1]/span/span[1]/text()"
 
+def tostr(obj):
+    return "".join(obj).strip().replace('\n', '').replace('\\n','')
+
 def milcom_raw(district_id: int, milcom_id: int) -> MilComRaw:
     """
     Парсить адресу та інфо воєнкомату з сайту за номером області та номером воєнкомата.\n
@@ -24,9 +27,9 @@ def milcom_raw(district_id: int, milcom_id: int) -> MilComRaw:
     Returns: 
         MilComRaw: "сирі" дані про воєнкомат з адресою замість координат.
     """
-    name = "".join(sprotyv_tree.xpath(xpath_data.format(district_id, milcom_id, 1))).strip()
-    info = "".join(sprotyv_tree.xpath(xpath_data.format(district_id, milcom_id, 2))).strip()
-    phones = "".join(sprotyv_tree.xpath(xpath_data.format(district_id, milcom_id, 3))).strip()
+    name = tostr(sprotyv_tree.xpath(xpath_data.format(district_id, milcom_id, 1)))
+    info = tostr(sprotyv_tree.xpath(xpath_data.format(district_id, milcom_id, 2)))
+    phones = tostr(sprotyv_tree.xpath(xpath_data.format(district_id, milcom_id, 3)))
     return MilComRaw(name, info, phones)
 
 def district_raw(district_id:int) -> Tuple[str, List[MilComRaw]]:

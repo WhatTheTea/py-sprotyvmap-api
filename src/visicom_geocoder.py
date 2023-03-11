@@ -1,5 +1,16 @@
 from typing import Tuple
+from enum import Enum
 import requests
+
+class GeocoderExceptions(Enum):
+    BAD_API_KEY = -1
+    REQUEST_NOT_OK = -2
+    NOT_FOUND = -3
+
+class GeocoderException(Exception):
+    def __init__(self, text : str, type : GeocoderExceptions, *args) -> None:
+        super().__init__([text, type, *args])
+
 """
 Із вебсайту Visicom Geocoding API:
     https://api.visicom.ua/data-api/5.0/[lang]/geocode[.format]?
@@ -81,12 +92,31 @@ Args:
 Returns: 
     Tuple[int,int]: Координати шуканої локації (latitude, longitude)
         """
+        # Запит
+        request_str = self.build_request(location, **kwargs)
+        response = requests.get(request_str)
+        # 
+        if response.text == "{'status': 'Unauthorized'}" or response.status_code == 401:
+            raise GeocoderException(f"Не вдалося отримати доступ до сервісу геокодування. Перевірте ключ API", GeocoderExceptions.BAD_API_KEY)
+        
+        if not response.ok:
+            raise GeocoderException(f"Запит до сервісу геокодування не був успішим. Помилка {response.status_code} {response.reason}", GeocoderExceptions.REQUEST_NOT_OK)
+        
+        if response.text == "{}":
+            raise GeocoderException(f"Не вдалося знайти координати за адресою: {location}", GeocoderExceptions.NOT_FOUND)
+        
+        request_json = response.json()
+        point = request_json["geo_centroid"]['coordinates']
+        coords = point[1], point[0]
+        return coords
+    
+    def build_request(self, location : str, **kwargs):
         preset_kwargs = {
-            "format" : "json",
-            "key" : self._apikey,
-            "text" : location,
-            "limit" : 1
-        }
+                "format" : "json",
+                "key" : self._apikey,
+                "text" : location,
+                "limit" : 1
+            }
         default_kwargs = {"lang" : "uk"}
         kwargs = {**default_kwargs, **kwargs, **preset_kwargs} # Захист від підміни важливих аргументів
         # Конструювання HTTP запиту
@@ -96,26 +126,5 @@ Returns:
             if k in self._allowedArgs:
                 v = str(v).replace('&','').replace('?','')
                 request_str += f'&{k}={v}'
-        # Запит
-        try:
-            request = requests.get(request_str)
 
-            if request.text == "{'status': 'Unauthorized'}" or request.status_code == 401:
-                raise Exception(f"Не вдалося отримати доступ до сервісу геокодування. Перевірте ключ API")
-            
-            if not request.ok:
-                raise Exception(f"Запит до сервісу геокодування не був успішим. Помилка {request.status_code} {request.reason}")
-            
-            if request.text == "{}":
-                raise Exception(f"Не вдалося знайти координати за адресою: {location}")
-            
-        except Exception as ex:
-            print(ex)
-            return None
-        
-        else:
-            request_json = request.json()
-            point = request_json["geo_centroid"]['coordinates']
-            coords = point[1], point[0]
-            return coords
-        
+        return request_str
