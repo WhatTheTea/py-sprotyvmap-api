@@ -34,7 +34,10 @@ def get_districts():
     """
     Отримує всі координати воєнкоматів України + контактні дані де можливо
     """
-    return generate_districts(), {"Content-Type": "application/json"}
+    return generate_districts(), {
+        "Content-Type": "application/json", 
+        "Access-Control-Allow-Origin":'*' # ! Потенційно небезпечно
+        }
 
 def generate_districts():
         """
