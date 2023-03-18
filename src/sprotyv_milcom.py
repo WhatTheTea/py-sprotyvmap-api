@@ -32,38 +32,36 @@ class MilCom:
     name:str
     latlng:tuple
     info:str
-    _geocoder : visicom_geocoder.Geocoder
 
     def __init__(self, name:str, info:str, phones:str):
-        latlng = self.geocode_regex_wrapper(info)
+        latlng = geocode_regex_wrapper(info)
         if latlng:
             self.info = phones
             self.latlng = latlng
             self.name = name
-            self._geocoder = _geocoder
 
     def __iter__(self):
         return iter(astuple(self))
     
-    @cached(_cache)
-    def geocode_regex_wrapper(self, location:str, **kwargs) -> tuple:
-        """
-        Кешована функція отримання координат за назвою локації.\n
-        Args:
-            geocoder (visicom_geocoder.Geocoder): Visicom Geocoder API
-            location (str): Локація для знаходження
-            **kwargs: див. geocoder.geocode
-        Returns:
-            Tuple[int,int]: Координати локації
-        """
-        # Якась область, м.\смт.\с. Якесь, вул. Якась, якийсь
-        re_distric_pattern = r"[А-Яа-яіІ-]+ (обл\.|область)"
-        re_town_pattern = r"((м\.|смт\.|с\.|смт|пгт\.)\s*[А-Яа-яіІ-]+)((.*\d[а-я]{1})|(.*\d))"
-        district = dre.group() if (dre := re.search(re_distric_pattern, location)) else ''
-        town = tre.group() if (tre := re.search(re_town_pattern, location)) else ''
-        try:
-            loc = district + " " + town if town.strip() != "" else location
-            return self._geocoder.geocode(loc, **kwargs)
-        except Exception as ex:
-            print(ex, f"pre regex: {location}")
-            return
+@cached(_cache)
+def geocode_regex_wrapper(location:str, **kwargs) -> tuple:
+    """
+    Кешована функція отримання координат за назвою локації.\n
+    Args:
+        geocoder (visicom_geocoder.Geocoder): Visicom Geocoder API
+        location (str): Локація для знаходження
+        **kwargs: див. geocoder.geocode
+    Returns:
+        Tuple[int,int]: Координати локації
+    """
+    # Якась область, м.\смт.\с. Якесь, вул. Якась, якийсь
+    re_distric_pattern = r"[А-Яа-яіІ-]+ (обл\.|область)"
+    re_town_pattern = r"((м\.|смт\.|с\.|смт|пгт\.)\s*[А-Яа-яіІ-]+)((.*\d[а-я]{1})|(.*\d))"
+    district = dre.group() if (dre := re.search(re_distric_pattern, location)) else ''
+    town = tre.group() if (tre := re.search(re_town_pattern, location)) else ''
+    try:
+        loc = district + " " + town if town.strip() != "" else location
+        return _geocoder.geocode(loc, **kwargs)
+    except Exception as ex:
+        print(ex, f"pre regex: {location}")
+        return
