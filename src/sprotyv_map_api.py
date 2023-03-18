@@ -39,6 +39,21 @@ def get_districts():
         "Access-Control-Allow-Origin":'*' # ! Потенційно небезпечно
         }
 
+@app.route("/get/districts/<int:district_id>")
+def get_district(district_id:int):
+    """
+    Отримує всі координати воєнкоматів в області під номером district_id
+    """
+    name, milcoms_raw = sprotyv_parser.district_raw(district_id)
+    data = generate_milcoms(milcoms_raw)
+    if data != [] and data != None:
+        result = "{"
+        result += f'"{name}":'
+        result += json.dumps(data)
+        result += '}'
+        return result, {"Content-Type": "application/json"}
+    flask.abort(404)
+
 def generate_districts():
         """
         { "district":[...], "other":[...] }
@@ -52,25 +67,13 @@ def generate_districts():
             name, milcoms_raw = districts[i]
 
             yield f'"{name}":'
-            milcoms = milcoms_generator(milcoms_raw)
+            milcoms = generate_milcoms(milcoms_raw)
             yield json.dumps(milcoms)
             if i < len(districts)-1:
                 yield ","
         yield '}'
 
-@app.route("/get/districts/<int:district_id>")
-def get_district(district_id:int):
-    """
-    Отримує всі координати воєнкоматів в області під номером district_id
-    """
-    name, milcoms_raw = sprotyv_parser.district_raw(district_id)
-    result = "{"
-    result += f'"{name}":'
-    result += json.dumps(milcoms_generator(milcoms_raw))
-    result += '}'
-    return result, {"Content-Type": "application/json"}
-
-def milcoms_generator(milcoms_raw:List[MilComRaw]) -> List[dict]:
+def generate_milcoms(milcoms_raw:List[MilComRaw]) -> List[dict]:
     """
     Обробляє спарсені воєнкомати та фільтрує від пустих словників
     """

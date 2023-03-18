@@ -9,7 +9,7 @@ class GeocoderExceptions(Enum):
 
 class GeocoderException(Exception):
     def __init__(self, text : str, type : GeocoderExceptions, *args) -> None:
-        super().__init__([text, type, *args])
+        super([text, type, *args])
 
 """
 Із вебсайту Visicom Geocoding API:
