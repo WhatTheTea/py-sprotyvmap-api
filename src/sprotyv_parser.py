@@ -18,13 +18,13 @@ def tostr(obj):
 
 def milcom_raw(district_id: int, milcom_id: int) -> MilComRaw:
     """
-    Парсить адресу та інфо воєнкомату з сайту за номером області та номером воєнкомата.\n
-    Номер воєнкомата є відносним кожної окремої області.\n
+    Парсить адресу та інфо військкомату з сайту за номером області та номером військкомата.\n
+    Номер військкомата є відносним кожної окремої області.\n
     Args:
         district_id (int): номер області (1..24)
-        milcom_id (int): номер воєнкомату (1..n)
+        milcom_id (int): номер військкомату (1..n)
     Returns: 
-        MilComRaw: "сирі" дані про воєнкомат з адресою замість координат.
+        MilComRaw: "сирі" дані про військкомат з адресою замість координат.
     """
     name = tostr(sprotyv_tree.xpath(XPATH_DATA.format(district_id, milcom_id, 1)))
     info = tostr(sprotyv_tree.xpath(XPATH_DATA.format(district_id, milcom_id, 2)))
@@ -33,11 +33,11 @@ def milcom_raw(district_id: int, milcom_id: int) -> MilComRaw:
 
 def district_raw(district_id:int) -> Tuple[str, List[MilComRaw]]:
     """
-    Повертає ім'я області та воєнкомати в ній\n
+    Повертає ім'я області та військкомати в ній\n
     Args:
         district_id (int): номер області (1..24)
     Returns:
-        Tuple[str, List[MilComRaw]]: кортеж з імені області та списку "сирих" воєнкоматів
+        Tuple[str, List[MilComRaw]]: кортеж з імені області та списку "сирих" військкоматів
     """
     table = sprotyv_tree.xpath(XPATH_TABLE.format(district_id))
     district_name = "".join(sprotyv_tree.xpath(XPATH_DISTRICT.format(district_id))).strip()
@@ -48,9 +48,9 @@ def district_raw(district_id:int) -> Tuple[str, List[MilComRaw]]:
 
 def districts_raw() -> Dict[str, List[MilComRaw]]:
     """
-    Повертає список спарсених адрес воєнкоматів розділених по областям\n
+    Повертає список спарсених адрес військкоматів розділених по областям\n
     Returns:
-        Dict[str, List[MilComRaw]]: словник ім'я області : список "сирих" воєнкоматів
+        Dict[str, List[MilComRaw]]: словник ім'я області : список "сирих" військкоматів
     """
     districts_raw = dict()
     for district_id in range(1,24+1):

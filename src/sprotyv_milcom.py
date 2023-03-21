@@ -12,10 +12,10 @@ _geocoder = visicom_geocoder.Geocoder(APIKEY)
 # Кеш для функції запиту до Visicom Data API
 _cache = LRUCache(500)
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class MilComRaw:
     """
-    Об'єкт який зберігає необроблені дані про воєнкомати.\n
+    Об'єкт який зберігає необроблені дані про військкомати.\n
     """
     name:str
     info:str
@@ -23,10 +23,10 @@ class MilComRaw:
 
     def __iter__(self):
         return iter(astuple(self))
-@dataclass
+@dataclass(eq=True)
 class MilCom:    
     """
-    Об'єкт який зберігає дані про воєнкомат та його координати.\n
+    Об'єкт який зберігає дані про військкомат та його координати.\n
     ! Створення цього об'єкту є дорогим, але результат дорогої функції кешується
     """
     name:str
