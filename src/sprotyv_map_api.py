@@ -1,7 +1,7 @@
 import flask
 import sprotyv_parser
 import json
-from typing import List
+from typing import Dict, List
 from sprotyv_milcom import MilCom, MilComRaw
 
 app = flask.Flask(__name__)
@@ -10,6 +10,9 @@ app = flask.Flask(__name__)
 def get_raw_milcoms():
     """
     Отримує всі адреси військкоматів України + контактні дані
+
+    Returns:
+        flask.Response : HTTP відповідь з JSON даними про всі військкомати України
     """
     milcoms_raw = sprotyv_parser.districts_raw()
     if milcoms_raw:
@@ -20,7 +23,13 @@ def get_raw_milcoms():
 @app.route("/get/districts/<int:district_id>/milcoms/<int:milcom_id>")
 def get_milcom(district_id:int, milcom_id:int):
     """
-    Отримує координати військкомату за його номером та номером області\n
+    Отримує координати військкомату за його номером та номером області
+
+    Args:
+        district_id (int): номер області (1..24)
+        milcom_id (int): номер військкомату (1..n)
+    Returns:
+        flask.Response : HTTP відповідь з JSON даними та координатами обраного військкомату 
     """
     milcom_raw = sprotyv_parser.milcom_raw(district_id, milcom_id)
     milcom = MilCom(*milcom_raw).__dict__
@@ -33,16 +42,24 @@ def get_milcom(district_id:int, milcom_id:int):
 def get_districts():
     """
     Отримує всі координати військкоматів України + контактні дані де можливо
+
+    Returns:
+        flask.Response : HTTP відповідь з JSON даними та координатами всіх військкомати України
     """
     return generate_districts(), {
         "Content-Type": "application/json", 
-        "Access-Control-Allow-Origin":'*' # ! Потенційно небезпечно
+        "Access-Control-Allow-Origin":'*' 
         }
 
 @app.route("/get/districts/<int:district_id>")
 def get_district(district_id:int):
     """
     Отримує всі координати військкоматів в області під номером district_id
+
+    Args:
+        district_id (int): номер області (1..24)
+    Returns:
+        flask.Response : HTTP відповідь з JSON даними про військкомати в окремій області
     """
     name, milcoms_raw = sprotyv_parser.district_raw(district_id)
     data = generate_milcoms(milcoms_raw)
@@ -56,7 +73,11 @@ def get_district(district_id:int):
 
 def generate_districts():
         """
+        Генерує дані про військкомати у форматі:
         { "district":[...], "other":[...] }
+        
+        Returns: 
+            Generator[str, None, None] : Генератор потокових даних про всі військкомати України
         """
         yield '{'
         # Отримання "сирих" військкоматів
@@ -76,6 +97,11 @@ def generate_districts():
 def generate_milcoms(milcoms_raw:List[MilComRaw]) -> List[dict]:
     """
     Обробляє спарсені військкомати та фільтрує від пустих словників
+
+    Args:
+        milcoms_raw (List[MilComRaw]) : "сира" інформація про військкомати для обробки
+    Returns:
+        List[dict] : Представлення об'єктів MilCom у вигляді словників
     """
     return [milcom for milcom_raw in milcoms_raw if not is_empty(milcom := MilCom(*milcom_raw).__dict__)]
 
