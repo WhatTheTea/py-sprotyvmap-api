@@ -55,13 +55,13 @@ def geocode_regex_wrapper(location:str, **kwargs) -> tuple:
         Tuple[int,int]: Координати локації
     """
     # Якась область, м.\смт.\с. Якесь, вул. Якась, якийсь
-    re_distric_pattern = r"[А-Яа-яіІ-]+ (обл\.|область)"
+    re_district_pattern = r"[А-Яа-яіІ-]+ (обл\.|область)"
     re_town_pattern = r"((м\.|смт\.|с\.|смт|пгт\.)\s*[А-Яа-яіІ-]+)((.*\d[а-я]{1})|(.*\d))"
-    district = dre.group() if (dre := re.search(re_distric_pattern, location)) else ''
-    town = tre.group() if (tre := re.search(re_town_pattern, location)) else ''
+    district = re_district.group() if (re_district := re.search(re_district_pattern, location)) else ''
+    town = re_town.group() if (re_town := re.search(re_town_pattern, location)) else ''
     try:
-        loc = district + " " + town if town.strip() != "" else location
-        return _geocoder.geocode(loc, **kwargs)
+        re_location = district + " " + town if town.strip() != "" else location
+        return _geocoder.geocode(re_location, **kwargs)
     except Exception as ex:
         print(ex, f"pre regex: {location}")
         return

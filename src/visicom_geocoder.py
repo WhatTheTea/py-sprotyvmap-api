@@ -78,7 +78,7 @@ class Geocoder:
 
     def geocode(self, location:str, **kwargs) -> Tuple[int,int]:
         """
-Функція пошуку координат місця даному в `location`.\n
+Метод пошуку координат місця даному в `location`.\n
 Args:
     location (str):
         Текст для геокодування
@@ -111,6 +111,21 @@ Returns:
         return coords
     
     def build_request(self, location : str, **kwargs):
+        """
+Метод створення запиту для пошуку координат місця даному в `location`.\n
+Args:
+    location (str):
+        Текст для геокодування
+    **kwargs:
+        lang (str):
+            Мова запиту і відповіді. Одна з (ru, uk, en).
+                default: uk
+        format (str):
+            Формат даних, що повертаються (json, csv).
+                default: json
+Returns: 
+    str : Рядок запиту до стороннього API
+        """
         preset_kwargs = {
                 "format" : "json",
                 "key" : self._apikey,
@@ -122,9 +137,9 @@ Returns:
         # Конструювання HTTP запиту
         request_str = f'https://api.visicom.ua/data-api/5.0/{kwargs.pop("lang")}/geocode.{kwargs.pop("format")}?'
 
-        for k,v in kwargs.items():
-            if k in self._allowedArgs:
-                v = str(v).replace('&','').replace('?','')
-                request_str += f'&{k}={v}'
+        for key,value in kwargs.items():
+            if key in self._allowedArgs:
+                value = str(value).replace('&','').replace('?','')
+                request_str += f'&{key}={value}'
 
         return request_str
