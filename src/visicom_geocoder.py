@@ -105,8 +105,8 @@ Returns:
         if response.text == "{}":
             raise GeocoderException(f"Не вдалося знайти координати за адресою: {location}", GeocoderExceptions.NOT_FOUND)
         
-        request_json = response.json()
-        point = request_json["geo_centroid"]['coordinates']
+        response_json = response.json()
+        point = response_json["geo_centroid"]['coordinates']
         coords = point[1], point[0]
         return coords
     
