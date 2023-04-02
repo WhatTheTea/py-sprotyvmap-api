@@ -8,13 +8,14 @@ import re
 # Отримання ключа 
 load_dotenv()
 APIKEY = getenv("VISICOM")
+_geocoder = visicom_geocoder.Geocoder(APIKEY)
 # Кеш для функції запиту до Visicom Data API
 _cache = LRUCache(500)
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class MilComRaw:
     """
-    Об'єкт який зберігає необроблені дані про воєнкомати.\n
+    Об'єкт який зберігає необроблені дані про військкомати.\n
     """
     name:str
     info:str
@@ -22,10 +23,10 @@ class MilComRaw:
 
     def __iter__(self):
         return iter(astuple(self))
-@dataclass
+@dataclass(eq=True)
 class MilCom:    
     """
-    Об'єкт який зберігає дані про воєнкомат та його координати.\n
+    Об'єкт який зберігає дані про військкомат та його координати.\n
     ! Створення цього об'єкту є дорогим, але результат дорогої функції кешується
     """
     name:str
@@ -43,7 +44,7 @@ class MilCom:
         return iter(astuple(self))
     
 @cached(_cache)
-def geocode_regex_wrapper(location:str, **kwargs):
+def geocode_regex_wrapper(location:str, **kwargs) -> tuple:
     """
     Кешована функція отримання координат за назвою локації.\n
     Args:
@@ -53,15 +54,14 @@ def geocode_regex_wrapper(location:str, **kwargs):
     Returns:
         Tuple[int,int]: Координати локації
     """
-    geocoder = visicom_geocoder.Geocoder(APIKEY)
     # Якась область, м.\смт.\с. Якесь, вул. Якась, якийсь
-    re_distric_pattern = r"[А-Яа-яіІ-]+ (обл\.|область)"
+    re_district_pattern = r"[А-Яа-яіІ-]+ (обл\.|область)"
     re_town_pattern = r"((м\.|смт\.|с\.|смт|пгт\.)\s*[А-Яа-яіІ-]+)((.*\d[а-я]{1})|(.*\d))"
-    district = dre.group() if (dre := re.search(re_distric_pattern, location)) else ''
-    town = tre.group() if (tre := re.search(re_town_pattern, location)) else ''
+    district = re_district.group() if (re_district := re.search(re_district_pattern, location)) else ''
+    town = re_town.group() if (re_town := re.search(re_town_pattern, location)) else ''
     try:
-        loc = district + " " + town if town.strip() != "" else location
-        return geocoder.geocode(loc, **kwargs)
+        re_location = district + " " + town if town.strip() != "" else location
+        return _geocoder.geocode(re_location, **kwargs)
     except Exception as ex:
         print(ex, f"pre regex: {location}")
         return
