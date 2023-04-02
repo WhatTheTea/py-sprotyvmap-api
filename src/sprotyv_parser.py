@@ -10,7 +10,7 @@ sprotyv_tree = etree.HTML(sprotyv_html)
 # XPath потрібних даних
 # .format: 1 - область, 2 - військомат, 3 - стовпець
 XPATH_DATA = "/html/body/div/section[2]/div/div[{}]/div/div[2]/div/div/table/tbody/tr[{}]/td[{}]/text()" 
-XPATH_TABLE = "/html/body/div/section[2]/div/div[{}]/div/div[2]/div/div/table/tbody/text()"
+XPATH_TABLE = "/html/body/div/section[2]/div/div[{}]/div/div[2]/div/div/table/tbody"
 XPATH_DISTRICT = "/html/body/div/section[2]/div/div[{}]/div/div[1]/span/span[1]/text()"
 
 def tostr(obj):
@@ -39,7 +39,7 @@ def district_raw(district_id:int) -> Tuple[str, List[MilComRaw]]:
     Returns:
         Tuple[str, List[MilComRaw]]: кортеж з імені області та списку "сирих" військкоматів
     """
-    table = sprotyv_tree.xpath(XPATH_TABLE.format(district_id))
+    table = sprotyv_tree.xpath(XPATH_TABLE.format(district_id))[0].getchildren()
     district_name = "".join(sprotyv_tree.xpath(XPATH_DISTRICT.format(district_id))).strip()
     milcoms_count = len(table) - 1
     milcoms_raw = [milcom_raw(district_id, milcom_id) for milcom_id in range(1,milcoms_count)]
