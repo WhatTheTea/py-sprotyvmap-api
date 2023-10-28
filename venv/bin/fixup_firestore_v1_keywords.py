@@ -1,4 +1,4 @@
-#!/home/wtt/sprotyvmap/venv/bin/python3
+#!/home/wtt/sprotyvmap/venv/bin/python3.10
 # -*- coding: utf-8 -*-
 # Copyright 2023 Google LLC
 #
