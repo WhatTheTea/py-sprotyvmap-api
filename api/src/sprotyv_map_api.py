@@ -4,9 +4,9 @@ import json
 from typing import Dict, List
 from sprotyv_milcom import MilCom, MilComRaw
 
-app = flask.Flask(__name__)
+api = flask.Flask(__name__)
 
-@app.route("/get/districts/raw")
+@api.route("/get/districts/raw")
 def get_raw_milcoms():
     """
     Отримує всі адреси військкоматів України + контактні дані
@@ -20,7 +20,7 @@ def get_raw_milcoms():
         return response
     flask.abort(404)
 
-@app.route("/get/districts/<int:district_id>/milcoms/<int:milcom_id>")
+@api.route("/get/districts/<int:district_id>/milcoms/<int:milcom_id>")
 def get_milcom(district_id:int, milcom_id:int):
     """
     Отримує координати військкомату за його номером та номером області
@@ -38,7 +38,7 @@ def get_milcom(district_id:int, milcom_id:int):
         return response
     flask.abort(404)
 
-@app.route("/get/districts")
+@api.route("/get/districts")
 def get_districts():
     """
     Отримує всі координати військкоматів України + контактні дані де можливо
@@ -51,7 +51,7 @@ def get_districts():
         "Access-Control-Allow-Origin":'*' 
         }
 
-@app.route("/get/districts/<int:district_id>")
+@api.route("/get/districts/<int:district_id>")
 def get_district(district_id:int):
     """
     Отримує всі координати військкоматів в області під номером district_id

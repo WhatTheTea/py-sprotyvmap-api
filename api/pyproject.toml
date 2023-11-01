@@ -1,0 +1,8 @@
+[project]
+name = "sportyvmap-api"
+version = "23.4.2"
+dynamic = ["dependencies"]
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+[tool.setuptools.packages]
+find = {}
