@@ -1,7 +1,7 @@
 from typing import Dict,List,Tuple
 from lxml import etree
 from requests import get as http_get
-from sprotyv_milcom import MilComRaw
+from sprotyvmap_api.sm_milcom import MilComRaw
 
 # Завантаження дерева сайту
 sprotyv_html = http_get("https://sprotyv.in.ua/").text

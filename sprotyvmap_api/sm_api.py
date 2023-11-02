@@ -1,8 +1,8 @@
 import flask
-import sprotyv_parser
+import sprotyvmap_api.sm_parser as sm_parser
 import json
-from typing import Dict, List
-from sprotyv_milcom import MilCom, MilComRaw
+from typing import List
+from sprotyvmap_api.sm_milcom import MilCom, MilComRaw
 
 api = flask.Flask(__name__)
 
@@ -14,7 +14,7 @@ def get_raw_milcoms():
     Returns:
         flask.Response : HTTP відповідь з JSON даними про всі військкомати України
     """
-    milcoms_raw = sprotyv_parser.districts_raw()
+    milcoms_raw = sm_parser.districts_raw()
     if milcoms_raw:
         response = flask.jsonify(milcoms_raw)
         return response
@@ -31,7 +31,7 @@ def get_milcom(district_id:int, milcom_id:int):
     Returns:
         flask.Response : HTTP відповідь з JSON даними та координатами обраного військкомату 
     """
-    milcom_raw = sprotyv_parser.milcom_raw(district_id, milcom_id)
+    milcom_raw = sm_parser.milcom_raw(district_id, milcom_id)
     milcom = MilCom(*milcom_raw).__dict__
     if milcom:
         response = flask.jsonify(milcom)
@@ -61,7 +61,7 @@ def get_district(district_id:int):
     Returns:
         flask.Response : HTTP відповідь з JSON даними про військкомати в окремій області
     """
-    name, milcoms_raw = sprotyv_parser.district_raw(district_id)
+    name, milcoms_raw = sm_parser.district_raw(district_id)
     data = generate_milcoms(milcoms_raw)
     if data != [] and data != None:
         result = "{"
@@ -81,7 +81,7 @@ def generate_districts():
         """
         yield '{'
         # Отримання "сирих" військкоматів
-        districts = list(sprotyv_parser.districts_raw().items())
+        districts = list(sm_parser.districts_raw().items())
 
         for i in range(len(districts)):
             # Розпаковка області

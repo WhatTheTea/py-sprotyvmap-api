@@ -1,6 +1,6 @@
 from dataclasses import dataclass, astuple
 from cachetools import cached, LRUCache
-import visicom_geocoder
+import sprotyvmap_api.sm_geocoder as sm_geocoder
 from dotenv import load_dotenv
 from os import getenv
 import re
@@ -8,7 +8,7 @@ import re
 # Отримання ключа 
 load_dotenv()
 APIKEY = getenv("VISICOM")
-_geocoder = visicom_geocoder.Geocoder(APIKEY)
+_geocoder = sm_geocoder.Geocoder(APIKEY)
 # Кеш для функції запиту до Visicom Data API
 _cache = LRUCache(500)
 
