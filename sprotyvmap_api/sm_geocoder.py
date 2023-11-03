@@ -8,8 +8,8 @@ class GeocoderExceptions(Enum):
     NOT_FOUND = -3
 
 class GeocoderException(Exception):
-    def __init__(self, text : str, type : GeocoderExceptions, *args) -> None:
-        super([text, type, *args])
+    def __init__(self, text : str, type : GeocoderExceptions) -> None:
+        super(tuple, (type.name, text))
 
 """
 Із вебсайту Visicom Geocoding API:
