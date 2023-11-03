@@ -3,9 +3,11 @@ import sprotyvmap_api.sm_parser as sm_parser
 import json
 from typing import List
 from sprotyvmap_api.sm_milcom import MilCom, MilComRaw
-
+import sprotyvmap_api.sm_milcom as sm_milcom
 api = flask.Flask(__name__)
 
+def set_visicom_key(key:str):
+    sm_milcom.APIKEY = key
 @api.route("/get/districts/raw")
 def get_raw_milcoms():
     """
