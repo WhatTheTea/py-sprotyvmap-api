@@ -1,15 +1,5 @@
 from typing import Tuple
-from enum import Enum
 import requests
-
-class GeocoderExceptions(Enum):
-    BAD_API_KEY = -1
-    REQUEST_NOT_OK = -2
-    NOT_FOUND = -3
-
-class GeocoderException(Exception):
-    def __init__(self, text : str, type : GeocoderExceptions) -> None:
-        super(tuple, (type.name, text))
 
 """
 Із вебсайту Visicom Geocoding API:
@@ -97,13 +87,13 @@ Returns:
         response = requests.get(request_str)
         # 
         if response.text == "{'status': 'Unauthorized'}" or response.status_code == 401:
-            raise GeocoderException(f"Не вдалося отримати доступ до сервісу геокодування. Перевірте ключ API", GeocoderExceptions.BAD_API_KEY)
+            raise Exception(f"Не вдалося отримати доступ до сервісу геокодування. Перевірте ключ API")
         
         if not response.ok:
-            raise GeocoderException(f"Запит до сервісу геокодування не був успішим. Помилка {response.status_code} {response.reason}", GeocoderExceptions.REQUEST_NOT_OK)
+            raise Exception(f"Запит до сервісу геокодування не був успішим. Помилка {response.status_code} {response.reason}")
         
         if response.text == "{}":
-            raise GeocoderException(f"Не вдалося знайти координати за адресою: {location}", GeocoderExceptions.NOT_FOUND)
+            raise Exception(f"Не вдалося знайти координати за адресою: {location}")
         
         response_json = response.json()
         point = response_json["geo_centroid"]['coordinates']
