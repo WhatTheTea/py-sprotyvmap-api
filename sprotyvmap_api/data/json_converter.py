@@ -1,18 +1,16 @@
+import sprotyvmap_api.data.data_preprocessing as dp
 from typing import List
-import sprotyvmap_api.parser as parser
-import sprotyvmap_api.data_preprocessing as dp
-
 import json
 
 def raw_data():
-    milcoms_raw = parser.all_districts()
-    if not is_empty(milcoms_raw):
+    milcoms_raw = dp.all_districts()
+    if milcoms_raw:
         data = json.dumps(milcoms_raw)
         return data
     
 
 def milcom(district_id:int, milcom_id:int):
-    milcom_raw = parser.milcom(district_id, milcom_id)
+    milcom_raw = dp.milcom(district_id, milcom_id)
     milcom = dp.MilCom(*milcom_raw).__dict__
     if milcom:
         data = json.dumps(milcom)
@@ -31,9 +29,9 @@ def district(district_id:int):
     Returns:
         flask.Response : HTTP відповідь з JSON даними про військкомати в окремій області
     """
-    name, milcoms_raw = parser.district(district_id)
+    name, milcoms_raw = dp.district(district_id)
     data = generate_milcoms(milcoms_raw)
-    if not is_empty(data):
+    if data:
         result = "{"
         result += f'"{name}":'
         result += json.dumps(data)
@@ -50,7 +48,7 @@ def generate_districts():
         """
         yield '{'
         # Отримання "сирих" військкоматів
-        districts = list(parser.all_districts().items())
+        districts = list(dp.all_districts().items())
 
         for i in range(len(districts)):
             # Розпаковка області
@@ -72,7 +70,5 @@ def generate_milcoms(milcoms_raw:List[dp.MilComRaw]) -> List[dict]:
     Returns:
         List[dict] : Представлення об'єктів MilCom у вигляді словників
     """
-    return [milcom for milcom_raw in milcoms_raw if not is_empty(milcom := dp.MilCom(*milcom_raw).__dict__)]
+    return [milcom for milcom_raw in milcoms_raw if (milcom := dp.MilCom(*milcom_raw).__dict__)]
 
-def is_empty(x):
-    return x is None or x == {} or x == []
