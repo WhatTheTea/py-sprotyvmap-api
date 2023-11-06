@@ -1,4 +1,5 @@
-import sprotyvmap_api.data.data_preprocessing as dp
+import sprotyvmap_api.data.preprocessing as dp
+from sprotyvmap_api.data.Point import Point
 from typing import List
 import json
 
@@ -9,15 +10,14 @@ def raw_data():
         return data
     
 
-def milcom(district_id:int, milcom_id:int):
-    milcom_raw = dp.milcom(district_id, milcom_id)
-    milcom = dp.MilCom(*milcom_raw).__dict__
-    if milcom:
-        data = json.dumps(milcom)
+def point(district_id:int, point_id:int):
+    point = dp.point(district_id, point_id).asdict()
+    if point:
+        data = json.dumps(point)
         return data
 
 def all_districts():
-    return generate_districts()
+    return districts_generator()
 
 
 def district(district_id:int):
@@ -29,8 +29,8 @@ def district(district_id:int):
     Returns:
         flask.Response : HTTP відповідь з JSON даними про військкомати в окремій області
     """
-    name, milcoms_raw = dp.district(district_id)
-    data = generate_milcoms(milcoms_raw)
+    name, points = dp.district(district_id)
+    data = points_generator(points)
     if data:
         result = "{"
         result += f'"{name}":'
@@ -38,7 +38,7 @@ def district(district_id:int):
         result += '}'
         return result
 
-def generate_districts():
+def districts_generator():
         """
         Генерує дані про військкомати у форматі:
         { "district":[...], "other":[...] }
@@ -55,13 +55,13 @@ def generate_districts():
             name, milcoms_raw = districts[i]
 
             yield f'"{name}":'
-            milcoms = generate_milcoms(milcoms_raw)
+            milcoms = points_generator(milcoms_raw)
             yield json.dumps(milcoms)
             if i < len(districts)-1:
                 yield ","
         yield '}'
 
-def generate_milcoms(milcoms_raw:List[dp.MilComRaw]) -> List[dict]:
+def points_generator(points:List[Point]) -> List[dict]:
     """
     Обробляє спарсені військкомати та фільтрує від пустих словників
 
@@ -70,5 +70,5 @@ def generate_milcoms(milcoms_raw:List[dp.MilComRaw]) -> List[dict]:
     Returns:
         List[dict] : Представлення об'єктів MilCom у вигляді словників
     """
-    return [milcom for milcom_raw in milcoms_raw if (milcom := dp.MilCom(*milcom_raw).__dict__)]
+    return [point.asdict() for point in points if point]
 

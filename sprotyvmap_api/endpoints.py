@@ -1,7 +1,4 @@
 import flask
-import json
-from typing import List
-from sprotyvmap_api.data_preprocessing import Point
 
 flask_app : flask.Flask
 

@@ -6,8 +6,8 @@ from os import getenv
 import re
 # Отримання ключа 
 load_dotenv()
-APIKEY = getenv("VISICOM")
-_geocoder = geocoder.Geocoder(APIKEY)
+GEOCODER_APIKEY = getenv("GEOCODER_APIKEY")
+_geocoder = geocoder.Geocoder(GEOCODER_APIKEY)
 # Кеш для функції запиту до Geocoder API
 _cache = LRUCache(500)
 
@@ -23,11 +23,11 @@ class Point():
         self._latlng = self._latlng if self._latlng else geocode_regex_wrapper(self.location)
         return self._latlng
 
-    def asdict(self):
+    def asdict(self, geocode = True):
         return {
             'name' : self.name,
             'location' : self.location,
-            'latlng' : self.latlng,
+            'latlng' : self.latlng if geocode else None,
             'info' : self.info
         }
     
