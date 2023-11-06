@@ -1,12 +1,13 @@
 import flask
-import sprotyvmap_api.sm_parser as sm_parser
+import sprotyvmap_api.parser as parser
 import json
 from typing import List
-from sprotyvmap_api.sm_milcom import MilCom, MilComRaw
+from sprotyvmap_api.milcom import MilCom, MilComRaw
+import sprotyvmap_api.milcom as milcom
 
-api = flask.Flask(__name__)
+flask_app = flask.Flask(__name__)
 
-@api.route("/get/districts/raw")
+@flask_app.route("/get/districts/raw")
 def get_raw_milcoms():
     """
     Отримує всі адреси військкоматів України + контактні дані
@@ -14,13 +15,13 @@ def get_raw_milcoms():
     Returns:
         flask.Response : HTTP відповідь з JSON даними про всі військкомати України
     """
-    milcoms_raw = sm_parser.districts_raw()
+    milcoms_raw = parser.districts_raw()
     if milcoms_raw:
         response = flask.jsonify(milcoms_raw)
         return response
     flask.abort(404)
 
-@api.route("/get/districts/<int:district_id>/milcoms/<int:milcom_id>")
+@flask_app.route("/get/districts/<int:district_id>/milcoms/<int:milcom_id>")
 def get_milcom(district_id:int, milcom_id:int):
     """
     Отримує координати військкомату за його номером та номером області
@@ -31,14 +32,14 @@ def get_milcom(district_id:int, milcom_id:int):
     Returns:
         flask.Response : HTTP відповідь з JSON даними та координатами обраного військкомату 
     """
-    milcom_raw = sm_parser.milcom_raw(district_id, milcom_id)
+    milcom_raw = parser.milcom_raw(district_id, milcom_id)
     milcom = MilCom(*milcom_raw).__dict__
     if milcom:
         response = flask.jsonify(milcom)
         return response
     flask.abort(404)
 
-@api.route("/get/districts")
+@flask_app.route("/get/districts")
 def get_districts():
     """
     Отримує всі координати військкоматів України + контактні дані де можливо
@@ -51,7 +52,7 @@ def get_districts():
         "Access-Control-Allow-Origin":'*' 
         }
 
-@api.route("/get/districts/<int:district_id>")
+@flask_app.route("/get/districts/<int:district_id>")
 def get_district(district_id:int):
     """
     Отримує всі координати військкоматів в області під номером district_id
@@ -61,7 +62,7 @@ def get_district(district_id:int):
     Returns:
         flask.Response : HTTP відповідь з JSON даними про військкомати в окремій області
     """
-    name, milcoms_raw = sm_parser.district_raw(district_id)
+    name, milcoms_raw = parser.district_raw(district_id)
     data = generate_milcoms(milcoms_raw)
     if data != [] and data != None:
         result = "{"
@@ -81,7 +82,7 @@ def generate_districts():
         """
         yield '{'
         # Отримання "сирих" військкоматів
-        districts = list(sm_parser.districts_raw().items())
+        districts = list(parser.districts_raw().items())
 
         for i in range(len(districts)):
             # Розпаковка області
