@@ -11,9 +11,11 @@ def get_raw_points():
     Returns:
         flask.Response : HTTP відповідь з JSON даними про всі військкомати України
     """
-    data = [ds := dp.district(i) for i in range(1,24+1) if ds]
+    data = [ds for i in range(1,24+1) if (ds := dp.district(i))]
+    for kv in data:
+        kv["points"] = [p.asdict(False) for p in kv["points"]]
     if data:
-        flask.jsonify(data)
+        return flask.jsonify(data)
     flask.abort(flask.Response("Data was empty", 500))
 
 @flask_app.route("/get/districts/<int:district_id>/points/<int:point_id>")
