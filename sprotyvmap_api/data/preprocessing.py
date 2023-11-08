@@ -1,4 +1,4 @@
-from data.Point import Point
+from sprotyvmap_api.data.Point import Point
 from requests import get as http_get
 from lxml import etree
 

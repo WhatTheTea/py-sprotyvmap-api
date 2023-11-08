@@ -1,5 +1,5 @@
 import flask
-import data.preprocessing as dp
+import sprotyvmap_api.data.preprocessing as dp
 
 flask_app = flask.Flask(__name__)
 
@@ -16,14 +16,14 @@ def get_raw_points():
         flask.jsonify(data)
     flask.abort(flask.Response("Data was empty", 500))
 
-@flask_app.route("/get/districts/<int:district_id>/milcoms/<int:milcom_id>")
-def get_milcom(district_id:int, milcom_id:int):
+@flask_app.route("/get/districts/<int:district_id>/points/<int:point_id>")
+def get_point(district_id:int, point_id:int):
     """
     Отримує координати військкомату за його номером та номером області
 
     Args:
         district_id (int): номер області (1..24)
-        milcom_id (int): номер військкомату (1..n)
+        point_id (int): номер військкомату (1..n)
     Returns:
         flask.Response : HTTP відповідь з JSON даними та координатами обраного військкомату 
     """
