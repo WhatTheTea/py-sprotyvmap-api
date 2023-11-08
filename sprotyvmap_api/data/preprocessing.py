@@ -1,6 +1,5 @@
 from data.Point import Point
 from requests import get as http_get
-from typing import Dict, List,Tuple
 from lxml import etree
 
 # Завантаження дерева сайту

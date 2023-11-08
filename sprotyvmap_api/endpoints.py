@@ -1,17 +1,20 @@
 import flask
+import data.preprocessing as dp
 
-flask_app : flask.Flask
+flask_app = flask.Flask(__name__)
 
 @flask_app.route("/get/districts/raw")
-def get_raw_milcoms():
+def get_raw_points():
     """
     Отримує всі адреси військкоматів України + контактні дані
 
     Returns:
         flask.Response : HTTP відповідь з JSON даними про всі військкомати України
     """
-    
-    flask.abort(404)
+    data = [ds := dp.district(i) for i in range(1,24+1) if ds]
+    if data:
+        flask.jsonify(data)
+    flask.abort(flask.Response("Data was empty", 500))
 
 @flask_app.route("/get/districts/<int:district_id>/milcoms/<int:milcom_id>")
 def get_milcom(district_id:int, milcom_id:int):
