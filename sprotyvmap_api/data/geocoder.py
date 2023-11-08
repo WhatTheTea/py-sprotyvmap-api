@@ -1,6 +1,16 @@
 from typing import Tuple
 import requests
 
+class GeocoderException(Exception):
+    message : str
+    status : int
+    def __init__(self, message, status):
+        super().__init__(message)
+        self.status = status
+
+    def __str__(self):
+        return f"{self.status} : {self.message}"
+
 class Geocoder:
     """
     Неповна реалізація geocoding API від Visicom.
@@ -34,13 +44,13 @@ Returns:
         response = requests.get(request_str)
         # 
         if response.text == "{'status': 'Unauthorized'}" or response.status_code == 401:
-            raise Exception(f"Не вдалося отримати доступ до сервісу геокодування. Перевірте ключ API")
+            raise GeocoderException(f"Не вдалося отримати доступ до сервісу геокодування. Перевірте ключ API", 401)
         
         if not response.ok:
-            raise Exception(f"Запит до сервісу геокодування не був успішим. Помилка {response.status_code} {response.reason}")
+            raise GeocoderException(f"Запит до сервісу геокодування не був успішим. Помилка: {response.reason}", response.status_code)
         
         if response.text == "{}":
-            raise Exception(f"Не вдалося знайти координати за адресою: {location}")
+            raise GeocoderException(f"Не вдалося знайти координати за адресою: {location}", 404)
         
         response_json = response.json()
         point = response_json["geo_centroid"]['coordinates']

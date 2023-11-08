@@ -50,6 +50,8 @@ def geocode_regex_wrapper(location:str, **kwargs) -> tuple:
     try:
         re_location = district + " " + town if town.strip() != "" else location
         return _geocoder.geocode(re_location, **kwargs)
-    except Exception as ex:
-        print(ex, f"pre regex: {location}")
-        return
+    except geocoder.GeocoderException as e:
+        if(e.status == 404):
+            print(f"Cant find {re_location}. Input location: {location}")
+        else:
+            raise e
