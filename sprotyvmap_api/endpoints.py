@@ -1,5 +1,6 @@
 import flask
 import sprotyvmap_api.data.preprocessing as dp
+from sprotyvmap_api.data.geocoder import GeocoderException
 
 flask_app = flask.Flask(__name__)
 
@@ -29,8 +30,13 @@ def get_point(district_id:int, point_id:int):
     Returns:
         flask.Response : HTTP відповідь з JSON даними та координатами обраного військкомату 
     """
-    
-    flask.abort(404)
+    try:
+        data = dp.point(district_id, point_id).asdict()
+        if data: return flask.jsonify(data)
+    except GeocoderException as e:
+        flask.abort(e.status)
+    else:
+        flask.abort(404)
 
 @flask_app.route("/get/districts")
 def get_districts():
